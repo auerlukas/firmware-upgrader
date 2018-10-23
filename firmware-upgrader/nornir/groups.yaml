@@ -1,0 +1,10 @@
+ins_network:
+  nornir_username: ins
+  nornir_password: ins@lab
+  nornir_nos: ios
+
+cisco_sandbox:
+  nornir_username: admin
+  nornir_password: Admin_1234!
+  nornir_nos: nxos
+  nornir_ssh_port: 8181

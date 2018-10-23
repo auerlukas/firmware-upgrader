@@ -1,0 +1,27 @@
+---
+sbx-nxos-mgmt.cisco.com:
+  site: cisco
+  test: True
+  groups:
+    - cisco_sandbox
+
+sw01-pod-1.lab.ins.hsr.ch:
+  site: branch01
+  test: True
+  groups:
+    - ins_network
+
+sw02-pod-1.lab.ins.hsr.ch:
+  site: branch01
+  groups:
+    - ins_network
+
+sw03-pod-1.lab.ins.hsr.ch:
+  site: branch02
+  groups:
+    - ins_network
+
+sw04-pod-1.lab.ins.hsr.ch:
+  site: branch02
+  groups:
+    - ins_network
