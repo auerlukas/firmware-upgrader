@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}Firmware Upgrader{% endblock %}
+{% block head %}
+{{ super() }}
+{% endblock %}
+
+{% block content %}
+
+<h1>Firmware Upgrader</h1>
+<p>
+    <table class="table table-sm table-striped table-bordered">
+    <thead class="thead-dark">
+        <th scope="col">Host Name</th>
+        <th scope="col">Firmware</th>
+    </thead>
+
+    {% for hostname, firmware in devices.items() %}
+    <tbody>
+        <tr>
+            <th scope="row">{{ hostname }}</th>
+            <td>{{ firmware }}</td>
+        </tr>
+    </tbody>
+    {% endfor %}
+
+    </table>
+
+    <a href="/"><< back</a>
+
+</p>
+
+{% endblock %}

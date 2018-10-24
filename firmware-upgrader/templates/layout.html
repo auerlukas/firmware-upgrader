@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <script src="{{ url_for('static', filename='js/bootstrap.js') }}" crossorigin="anonymous"></script>
+    {% endblock %}
+</head>
+<body>
+<table width="100%" border="0">
+    <tr>
+        <td width="100%" align="center">
+            <div id="content">{% block content %}{% endblock %}</div>
+            <div id="footer">
+                {% block footer %}
+                <p class="footer">AUL 2018</p>
+                {% endblock %}
+            </div>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

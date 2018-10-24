@@ -3,10 +3,13 @@ bcrypt==3.1.4
 certifi==2018.10.15
 cffi==1.11.5
 chardet==3.0.4
-colorama==0.4.0
+Click==6.7
+colorama==0.3.9
 cryptography==2.3.1
+Flask==1.0.2
 future==0.16.0
 idna==2.7
+ItsDangerous==1.0.0
 Jinja2==2.10
 junos-eznc==2.2.0
 lxml==4.2.5
@@ -16,6 +19,7 @@ ncclient==0.6.3
 netaddr==0.7.19
 netmiko==2.3.0
 nornir==1.1.0
+OpenVulnQuery==1.30
 paramiko==2.4.2
 pyasn1==0.4.4
 pycparser==2.19
@@ -32,3 +36,4 @@ selectors2==2.0.1
 six==1.11.0
 textfsm==0.4.1
 urllib3==1.24
+Werkzeug==0.14.1
