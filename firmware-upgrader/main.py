@@ -44,6 +44,9 @@ def get_firmware_version(task):
 def start():
     return render_template('index.html')
 
+@app.route("/inventory")
+def inventory():
+    return render_template('inventory.html')
 
 @app.route("/firmware")
 def run_nornir():
@@ -63,6 +66,10 @@ def run_nornir():
         # print('{h}: {f}'.format(h=cisco.inventory.hosts[h]['name'], f=cisco.inventory.hosts[h]['firmware']))
 
     return render_template('firmware.html', devices=devices)
+
+@app.route("/vulnerabilities")
+def vulnerabilities():
+    return render_template('vulnerabilities.html')
 
 
 if __name__ == '__main__':
