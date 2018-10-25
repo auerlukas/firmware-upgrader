@@ -5,6 +5,37 @@
 
 {% block content %}
 
-Vulnerabilities
+<div class="container" align-items-center>
+    <div class="row">
+        <div class="col-sm">
+            Vulnerabilities<br>
+            currently hardcoded for version 12.2(55)SE11<br><br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm">
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="thead-dark">
+                <th scope="col">Vulnerability</th>
+                <th scope="col">Description</th>
+                <th scope="col">Link</th>
+                </thead>
+                <tbody>
+                {% for v in vulnerabilities %}
+                <tr>
+                    <th scope="row">{{ v.advisory_id }}</th>
+                    <td>{{ v.advisory_title }}</td>
+                    <td><a href="{{ v.publication_url }}">{{ v.publication_url }}</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+
 
 {% endblock %}
+

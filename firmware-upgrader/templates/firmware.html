@@ -5,25 +5,23 @@
 
 {% block content %}
 
-<p>
-    <table class="table table-sm table-striped table-bordered">
-    <thead class="thead-dark">
-        <th scope="col">Host Name</th>
-        <th scope="col">Firmware</th>
-    </thead>
 
-    {% for hostname, firmware in devices.items() %}
-    <tbody>
-        <tr>
-            <th scope="row">{{ hostname }}</th>
-            <td>{{ firmware }}</td>
-        </tr>
-    </tbody>
-    {% endfor %}
+<table class="table table-sm table-striped table-bordered">
+<thead class="thead-dark">
+    <th scope="col">Host Name</th>
+    <th scope="col">Firmware</th>
+</thead>
 
-    </table>
-</p>
-    <br><br>
-    <a href="/"><< back</a>
+{% for hostname, firmware in devices.items() %}
+<tbody>
+    <tr>
+        <th scope="row">{{ hostname }}</th>
+        <td>{{ firmware }}</td>
+    </tr>
+</tbody>
+{% endfor %}
+
+</table>
+
 
 {% endblock %}
