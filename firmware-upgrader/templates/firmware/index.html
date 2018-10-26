@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
-{% set active_page = "inventory" %}
-{% block title %}Firmware Upgrader | Inventory{% endblock %}
+{% set active_page = "firmware" %}
+{% block title %}Firmware Upgrader | Firmware{% endblock %}
 {% block head %}{{ super() }}{% endblock %}
 
 {% block content %}
@@ -8,19 +8,16 @@
 <div class="dflex">
     <div class="row">
         <div class="col">
-            <h1 class="h4">Inventory</h1>
+            <h1 class="h4">Firmware</h1>
         </div>
     </div>
     <div class="row">
         <div class="col">
-            Zeile 1
+            <b>nornir:</b> click <a href="firmware/show">here</a> to get firmware version for all devices in site 'cisco' (see devices.yaml)
         </div>
     </div>
-    <div class="row">
-        <div class="col">
-            Zeile 2
-        </div>
-    </div>
+
 </div>
+
 
 {% endblock %}

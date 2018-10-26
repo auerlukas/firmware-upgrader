@@ -2,6 +2,6 @@
 num_workers: 100
 inventory: nornir.plugins.inventory.simple.SimpleInventory
 SimpleInventory:
-  host_file: "nornir/hosts.yaml"
-  group_file: "nornir/groups.yaml"
+  host_file: "inventory/devices.yaml"
+  group_file: "inventory/groups.yaml"
 logging_file: "c:\\data\\dev\\firmware-upgrader\\log\\nornir.log"

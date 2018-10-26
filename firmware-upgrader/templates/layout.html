@@ -26,13 +26,14 @@
     <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
 </nav>
 
+
 <!-- menu items; format = url, id, feather-icon-name, caption -->
 {% set navigation_bar = [
     ('/', 'index', 'home', 'Home'),
     ('/inventory', 'inventory', 'database', 'Inventory'),
     ('/firmware', 'firmware', 'file', 'Firmware'),
     ('/vulnerabilities', 'vulnerabilities', 'alert-triangle', 'Vulnerabilities'),
-    ('/vulnerabilities/show?version=12.2(55)SE11', 'show', 'alert-triangle', 'Vulnerabilities specific')
+    ('/vulnerabilities/show?os=ios&version=12.2(55)SE11', 'show', 'alert-triangle', 'Vulnerabilities specific')
 ] -%}
 <!-- default active page = home -->
 {% set active_page = active_page|default('index') -%}

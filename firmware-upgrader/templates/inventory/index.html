@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% set active_page = "inventory" %}
+{% block title %}Firmware Upgrader | Inventory{% endblock %}
+{% block head %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<div class="dflex">
+    <div class="row">
+        <div class="col">
+            <h1 class="h4">Inventory</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="thead-dark">
+                <th scope="col">Host Name</th>
+                <th scope="col">IP Address</th>
+                <th scope="col">Site</th>
+                <th scope="col">OS</th>
+                <th scope="col">Firmware</th>
+                <th scope="col">Vulnerabilities</th>
+                </thead>
+
+                <tbody>
+                {% for d in devices %}
+                <tr>
+                    <th scope="row">{{ devices[d].hostname }}</th>
+                    <td>{{ devices[d].ip }}</td>
+                    <td>{{ devices[d].site }}</td>
+                    <td>{{ devices[d].os }}</td>
+                    <td>{{ devices[d].version }}</td>
+                    <td>{% if devices[d].os == 'ios' or devices[d].os == 'ios-xe' %}
+                        <a href="vulnerabilities/show?os={{ devices[d].os }}&version={{ devices[d].version }}">check</a>
+                        {% else %}
+                        os not supported
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

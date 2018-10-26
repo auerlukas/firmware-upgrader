@@ -19,24 +19,20 @@
                 <th scope="col">Firmware</th>
                 </thead>
 
-                {% for hostname, firmware in devices.items() %}
                 <tbody>
+                {% for hostname, firmware in devices.items() %}
                 <tr>
                     <th scope="row">{{ hostname }}</th>
                     <td><a href="vulnerabilities/show?version={{ firmware }}">{{ firmware }}</a></td>
                 </tr>
-                </tbody>
                 {% endfor %}
+                </tbody>
 
             </table>
         </div>
     </div>
 
 </div>
-
-
-
-
 
 
 {% endblock %}

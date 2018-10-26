@@ -8,3 +8,9 @@ cisco_sandbox:
   nornir_password: Admin_1234!
   nornir_nos: nxos
   nornir_ssh_port: 8181
+
+dummy:
+  nornir_username: admin
+  nornir_password: admin
+  nornir_nos: ios
+

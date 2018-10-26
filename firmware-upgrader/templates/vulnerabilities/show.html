@@ -8,7 +8,7 @@
 <div class="dflex">
     <div class="row">
         <div class="col">
-            <h1 class="h4">Vulnerabilities for version {{ version }}</h1>
+            <h1 class="h4">Vulnerabilities for {{ os }} version {{ version }}</h1>
         </div>
     </div>
     <div class="row">
@@ -19,16 +19,24 @@
         <div class="col">
             <table class="table table-sm table-striped table-bordered">
                 <thead class="thead-dark">
-                <th scope="col">Vulnerability</th>
-                <th scope="col">Description</th>
+                <th scope="col">CVSS Base Score</th>
+                <th scope="col">Advisory ID</th>
+                <th scope="col">Advisory Title</th>
+                <th scope="col">First Fixed</th>
                 <th scope="col">Link</th>
                 </thead>
                 <tbody>
                 {% for v in vulnerabilities %}
                 <tr>
+                    <td
+                        {% if v.cvss_base_score | float > 9 %}style="background-color:#FF0000"
+                        {% elif v.cvss_base_score | float > 8 %}style="background-color:#f4a442"
+                        {% endif %}
+                        >{{ v.cvss_base_score }}</td>
                     <th scope="row">{{ v.advisory_id }}</th>
-                    <td>{{ v.advisory_title }}</td>
-                    <td><a href="{{ v.publication_url }}">{{ v.publication_url }}</a></td>
+                    <td>{{ v.advisory_title | truncate(80)}}...</td>
+                    <td>{{ v.first_fixed }}</td>
+                    <td><a href="{{ v.publication_url }}">{{ v.publication_url | truncate(30) }}</a></td>
                 </tr>
                 {% endfor %}
                 </tbody>
