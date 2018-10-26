@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% set active_page = "show" %}
+{% block title %}Firmware Upgrader | Vulnerabilities {% endblock %}
+{% block head %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<div class="dflex">
+    <div class="row">
+        <div class="col">
+            <h1 class="h4">Vulnerabilities for version {{ version }}</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col bs-linebreak" style="height:10px">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="thead-dark">
+                <th scope="col">Vulnerability</th>
+                <th scope="col">Description</th>
+                <th scope="col">Link</th>
+                </thead>
+                <tbody>
+                {% for v in vulnerabilities %}
+                <tr>
+                    <th scope="row">{{ v.advisory_id }}</th>
+                    <td>{{ v.advisory_title }}</td>
+                    <td><a href="{{ v.publication_url }}">{{ v.publication_url }}</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+
+{% endblock %}
+

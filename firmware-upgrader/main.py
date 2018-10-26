@@ -11,32 +11,13 @@ from typing import List
 
 from flask import Flask
 from flask import render_template
+from flask import request
 from nornir.core import InitNornir
 from nornir.plugins.tasks import networking
 from nornir.plugins.tasks.networking import napalm_get
 from nornir.plugins.functions.text import print_result
+
 app = Flask(__name__)
-
-
-def find_vulnerabilities(version: str) -> List[openVulnQuery.advisory.AdvisoryIOS]:
-    """
-    finds all vulnerabilities of a given Cisco switch model by querying the Cisco openvuln API
-    (only works for devices running IOS since function 'get_by_ios' is being used
-    :param version: Cisco switch model running IOS
-    :return: returns a list of all found vulnerabilities
-    """
-    try:
-        with(open('openvuln/openvuln_api_credentials.json', 'r')) as data:
-            credentials = json.load(data)
-    except FileNotFoundError as e:
-        print('file with openvuln api credentials could not be found!\n{e}'.format(e=e), file=sys.stderr)
-        sys.exit(1)
-
-    openVulnQuery.query_client.OpenVulnQueryClient
-    query_client: openVulnQuery.query_client.OpenVulnQueryClient = openVulnQuery.query_client.OpenVulnQueryClient(client_id=credentials['CLIENT_ID'],
-                                                            client_secret=credentials['CLIENT_SECRET'])
-    advisories: List[openVulnQuery.advisory.AdvisoryIOS] = query_client.get_by_ios('', version)
-    return advisories
 
 
 def get_firmware_version(task):
@@ -99,9 +80,33 @@ def run_nornir():
 
 @app.route("/vulnerabilities")
 def vulnerabilities():
-    version = '12.2(55)SE11'
-    vulnerabilities = find_vulnerabilities(version)
     return render_template('vulnerabilities.html', vulnerabilities=vulnerabilities)
+
+
+@app.route("/vulnerabilities/show")
+def find_vulnerabilities(version: str = '') -> List[openVulnQuery.advisory.AdvisoryIOS]:
+    """
+    finds all vulnerabilities of a given Cisco switch model by querying the Cisco openvuln API
+    (only works for devices running IOS since function 'get_by_ios' is being used
+    :param version: Cisco switch model running IOS
+    :return: returns a list of all found vulnerabilities
+    """
+    if version == '':
+        version = request.args.get('version')
+
+    try:
+        with(open('openvuln/openvuln_api_credentials.json', 'r')) as data:
+            credentials = json.load(data)
+    except FileNotFoundError as e:
+        print('file with openvuln api credentials could not be found!\n{e}'.format(e=e), file=sys.stderr)
+        sys.exit(1)
+
+    query_client: openVulnQuery.query_client.OpenVulnQueryClient = openVulnQuery.query_client.OpenVulnQueryClient(
+        client_id=credentials['CLIENT_ID'],
+        client_secret=credentials['CLIENT_SECRET'])
+    advisories: List[openVulnQuery.advisory.AdvisoryIOS] = query_client.get_by_ios('', version)
+
+    return render_template('vulnerabilities/show.html', vulnerabilities=advisories, version=version)
 
 
 if __name__ == '__main__':

@@ -5,23 +5,38 @@
 
 {% block content %}
 
+<div class="dflex">
+    <div class="row">
+        <div class="col">
+            <h1 class="h4">Firmware</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="thead-dark">
+                <th scope="col">Host Name</th>
+                <th scope="col">Firmware</th>
+                </thead>
 
-<table class="table table-sm table-striped table-bordered">
-<thead class="thead-dark">
-    <th scope="col">Host Name</th>
-    <th scope="col">Firmware</th>
-</thead>
+                {% for hostname, firmware in devices.items() %}
+                <tbody>
+                <tr>
+                    <th scope="row">{{ hostname }}</th>
+                    <td><a href="vulnerabilities/show?version={{ firmware }}">{{ firmware }}</a></td>
+                </tr>
+                </tbody>
+                {% endfor %}
 
-{% for hostname, firmware in devices.items() %}
-<tbody>
-    <tr>
-        <th scope="row">{{ hostname }}</th>
-        <td>{{ firmware }}</td>
-    </tr>
-</tbody>
-{% endfor %}
+            </table>
+        </div>
+    </div>
 
-</table>
+</div>
+
+
+
+
 
 
 {% endblock %}
