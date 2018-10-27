@@ -41,10 +41,14 @@ app = Flask(__name__)
 def start():
     return render_template('index.html')
 
+@app.route("/sites")
+def sites_index():
+    sites = get_sites()
+    return render_template('sites/index.html', sites=sites)
 
 @app.route("/inventory")
 def inventory_index():
-    devices = get_all_devices()
+    devices = get_devices()
     return render_template('inventory/index.html', devices=devices)
 
 
@@ -103,7 +107,29 @@ def find_vulnerabilities(os: str = '', version: str = '') -> List[openVulnQuery.
     return advisories
 
 
-def get_all_devices() -> dict:
+def get_sites() -> list:
+    """
+    reads the devices.yaml in the inventory directory and creates a distinct list of sites
+    :return: returns a list of all sites
+    """
+    try:
+        stream = open('inventory/devices.yaml')
+    except FileNotFoundError as e:
+        print('inventory file could not be found!\n{e}'.format(e=e), file=sys.stderr)
+        sys.exit(1)
+
+    devices = yaml.load(stream)
+
+    sites = []
+    for host, host_details in devices.items():
+        if host_details['site'] not in sites:
+            sites.append(host_details['site'])
+
+    return sites
+
+
+
+def get_devices() -> dict:
     """
     reads the devices.yaml in the inventory directory
     :return: returns a dictionary of all devices in the inventory
