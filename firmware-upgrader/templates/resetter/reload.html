@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% set active_page = "resetter" %}
+{% block title %}Firmware Upgrader | Switch Resetter{% endblock %}
+{% block head %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<div class="dflex">
+    <div class="row">
+        <div class="col">
+            <h1 class="h4">Switch {{ hostname }} is reloading...</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <p>Click <a href="reload_status?hostname={{ hostname }}&job_id={{ job_id }}">here</a> for status update.</p>
+            <p>Job ID: {{ job_id }}</p>
+        </div>
+    </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -22,16 +22,37 @@ from nornir.plugins.tasks.networking import napalm_get
 from nornir.plugins.functions.text import print_result
 from redis import Redis
 from rq import Queue
+from main import nr
 
 
-def reload_switch(self):
-    for i in range(10):
-        message = 'switch is rebooting: {i}%'.format(i=i*10)
-        self.update_state(state='PROGRESS',
-                          meta={'status': message})
-        time.sleep(1)
-    return {'current': 100, 'total': 100, 'status': 'Task completed!', 'result': 100}
-    pass
+def ping(task) -> bool:
+    # @TODO: implement ping method
+    return True
+
+
+def reload_switch(hostname):
+    logging.info('reloading switch {h}'.format(h=hostname))
+
+    # reload switch
+    # @TODO: reload switch
+
+    # wait at least 20sec in order to give switch enough time to shut down
+    # time.sleep(20)
+
+    ping_ok = False
+    time.sleep(10)
+    ping_ok = True
+    # # apply filter to inventory to only select the one affected host
+    # switch = nr.filter(hostname=hostname)
+    #
+    # while not ping_ok:
+    #     # run task 'ping'
+    #     ping_ok = switch.run(task=ping)
+    #
+    #     # wait for 5 seconds
+    #     time.sleep(5)
+
+    return {'status': 'switch reloaded successfully', 'ping': 'reachable'}
 
 
 def find_vulnerabilities(os: str = '', version: str = '') -> List[AdvisoryIOS]:
@@ -130,9 +151,6 @@ def get_firmware_version(task):
 
 
 def get_firmware():
-    # nr = InitNornir(config_file='nornir/config.yaml')
-    nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
-
     # apply filter to inventory
     cisco = nr.filter(site='cisco')
 
