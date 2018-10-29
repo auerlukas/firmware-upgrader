@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% set active_page = "resetter" %}
+{% block title %}Firmware Upgrader | Switch Resetter{% endblock %}
+{% block head %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<div class="dflex">
+    <div class="row">
+        <div class="col">
+            <h1 class="h4">Switch Resetter</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="thead-dark">
+                <th scope="col">Host Name</th>
+                <th scope="col">Reboot</th>
+                <th scope="col">Reset/Erase</th>
+                </thead>
+
+                <tbody>
+                {% for d in devices %}
+                <tr>
+                    <th scope="row">{{ devices[d].hostname }}</th>
+                    <td><a href="resetter/reload?hostname={{ devices[d].hostname }}">reboot</a></td>
+                    <td><a href="">reset</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

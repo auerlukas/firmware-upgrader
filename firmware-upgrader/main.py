@@ -1,3 +1,6 @@
+from redis import Redis
+from rq import Queue
+
 from app import *
 
 # @TODO comments/documentation
@@ -11,6 +14,8 @@ from app import *
 
 app = Flask(__name__)
 q = Queue(connection=Redis())
+# nr = InitNornir(config_file='nornir/config.yaml')
+nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
 
 
 # ##################################################################################################
@@ -54,7 +59,7 @@ def vulnerabilities_index():
 
 
 @app.route("/vulnerabilities/show")
-def vulnerabilities_show() -> List[openVulnQuery.advisory.AdvisoryIOS]:
+def vulnerabilities_show() -> List[AdvisoryIOS]:
     os = request.args.get('os')
     version = request.args.get('version')
 
@@ -62,15 +67,49 @@ def vulnerabilities_show() -> List[openVulnQuery.advisory.AdvisoryIOS]:
     return render_template('vulnerabilities/show.html', vulnerabilities=vulnerabilities, os=os, version=version)
 
 
-@app.route("/reloader")
-def reloader_index():
-    result = q.enqueue(reload_switch)
-    return render_template('reloader/index.html')
+@app.route("/resetter")
+def resetter_index():
+    devices = get_devices()
+    return render_template('resetter/index.html', devices=devices)
+
+
+@app.route("/resetter/reload")
+def reload():
+    hostname = request.args.get('hostname')
+
+    # creating a job ID
+    job_id = 'reload_{h}'.format(h=hostname)
+
+    # simple version
+    # job = q.enqueue(reload_switch, hostname)
+
+    # explicit version
+    job = q.enqueue_call(func=reload_switch,
+                         args=(hostname,),
+                         job_id=job_id)
+
+    return render_template('resetter/reload.html', hostname=hostname, job_id=job_id)
+
+
+@app.route("/resetter/reload_status")
+def reload_status():
+    hostname = request.args.get('hostname')
+
+    # debugging outputs
+    job = q.fetch_job('reload_{h}'.format(h=hostname))
+    if job is None:
+        print('Job is None.')
+    else:
+        print('Job Status: {s}'.format(s=job.get_status()))
+        print('Job Result: {r}'.format(r=job.result))
+        print('Job ID: {i}'.format(i=job.id))
+
+    job_id = request.args.get('job_id')
+
+    return render_template('resetter/reload_status.html', hostname=hostname, job=job, job_status=job.get_status())
 
 
 if __name__ == '__main__':
-    print("PATH: ")
-    print(sys.path)
     logging.basicConfig(filename='../log/app.log', level=logging.INFO)
 
     logging.debug('disabling InsecureRequestWarnings...')
