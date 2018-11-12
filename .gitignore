@@ -103,4 +103,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-openvuln/openvuln_api_credentials.json
+firmware-upgrader/openvuln/openvuln_api_credentials\.json
