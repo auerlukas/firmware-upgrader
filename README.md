@@ -24,7 +24,7 @@ cd /home/luk/dev/firmware-upgrader
 
 activate virtual environment (venv)
 ```
-source my_project/venv/bin/activate
+source venv/bin/activate
 ```
 
 go to source root
@@ -32,9 +32,9 @@ go to source root
 cd /home/luk/dev/firmware-upgrader/firmware-upgrader
 ```
 
-start RQ worker
+start RQ worker (obsolete)
 ```
-cd /home/luk7dev/firmware-upgrader/firmware-upgrader
+cd /home/luk/dev/firmware-upgrader/firmware-upgrader
 rq worker
 
 
@@ -44,6 +44,19 @@ rq worker
 # 12:47:26 Cleaning registries for queue: default
 ```
 
+start netbox
+```
+cd /home/luk/dev/netbox-docker
+docker-compose up -d
+```
+
+find out netbox URL
+```
+echo "http://$(docker-compose port nginx 8080)/"
+```
+
+more details about netbox:
+https://github.com/ninech/netbox-docker
 
 dockerized version
 ------------------

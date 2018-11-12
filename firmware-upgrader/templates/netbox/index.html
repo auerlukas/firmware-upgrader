@@ -1,0 +1,74 @@
+{% extends "layout.html" %}
+{% set active_page = "netbox" %}
+{% block title %}Firmware Upgrader | Netbox{% endblock %}
+{% block head %}{{ super() }}{% endblock %}
+
+{% block content %}
+
+<div class="dflex">
+    <div class="row">
+        <div class="col">
+            <h1 class="h4">Netbox</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            Make sure that netbox containers are running and that api_url_base points to the right IP:Port<br>
+            <p class="text-monospace">cd /home/luk/dev/netbox-docker<br>
+                docker-compose up -d<br>
+                echo "http://$(docker-compose port nginx 8080)/"<br><br></p>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h1 class="h6">Sites</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <table class="table table-sm table-striped table-bordered">
+                <thead class="thead-dark">
+                <th scope="col">Site</th>
+                <th scope="col">Region</th>
+                </thead>
+
+                <tbody>
+                {% for s in sites %}
+                <tr>
+                    <th scope="row">{{ s.name }}</th>
+                    <td>{{ s.region['name'] }}</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h1 class="h6">Add IP address</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <form action="" method="post" novalidate>
+                {{ ip_addr_form.hidden_tag() }}
+                <table>
+                    <tr>
+                        <td>{{ ip_addr_form.ip_address.label }}</td>
+                        <td>{{ ip_addr_form.prefix_length.label }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ ip_addr_form.ip_address(size=32) }}</td>
+                        <td>{{ ip_addr_form.prefix_length(size=32) }}</td>
+                    </tr>
+                    <tr>
+                        <td>{{ ip_addr_form.submit() }}</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

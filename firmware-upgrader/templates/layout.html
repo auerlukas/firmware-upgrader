@@ -21,21 +21,32 @@
 <body>
 <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
     <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="/">Firmware Upgrader</a>
-    <!-- version number -->
-    <p style="color: #ffffff">v0.0.1</p>
+    <!-- flash messages -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+
+    {% for message in messages %}
+    <p class="p-1 mb-0 bg-info text-white"><strong>{{ message }}</strong></p>
+    {% endfor %}
+
+    {% endif %}
+    {% endwith %}
+
+    </p>
     <!-- <input class="form-control form-control-dark w-100" type="text" placeholder="Search" aria-label="Search"> -->
 </nav>
 
 
 <!-- menu items; format = url, id, feather-icon-name, caption -->
 {% set navigation_bar = [
-    ('/', 'index', 'home', 'Home'),
-    ('/sites', 'sites', 'home', 'Sites'),
-    ('/inventory', 'inventory', 'database', 'Inventory'),
-    ('/firmware', 'firmware', 'file', 'Firmware'),
-    ('/vulnerabilities', 'vulnerabilities', 'alert-triangle', 'Vulnerabilities'),
-    ('/vulnerabilities/show?os=ios&version=12.2(55)SE11', 'show', 'alert-triangle', 'Vulnerabilities specific'),
-    ('/resetter', 'resetter', 'refresh-cw', 'Switch Resetter')
+('/', 'index', 'home', 'Home'),
+('/sites', 'sites', 'home', 'Sites'),
+('/inventory', 'inventory', 'database', 'Inventory'),
+('/firmware', 'firmware', 'file', 'Firmware'),
+('/vulnerabilities', 'vulnerabilities', 'alert-triangle', 'Vulnerabilities'),
+('/vulnerabilities/show?os=ios&version=12.2(55)SE11', 'show', 'alert-triangle', 'Vulnerabilities specific'),
+('/resetter', 'resetter', 'refresh-cw', 'Switch Resetter'),
+('/netbox', 'netbox', 'activity', 'Netbox')
 ] -%}
 <!-- default active page = home -->
 {% set active_page = active_page|default('index') -%}
@@ -81,18 +92,19 @@
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-    <!-- these javascripts currently not required
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-    <script>window.jQuery || document.write('<script src="{{ url_for('static', filename='js/vendor/jquery-slim.min.js') }}"><\/script>')</script>
-    <script src="{{ url_for('static', filename='js/vendor/popper.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-    -->
+<!-- these javascripts currently not required
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="{{ url_for('static', filename='js/vendor/jquery-slim.min.js') }}"><\/script>')</script>
+<script src="{{ url_for('static', filename='js/vendor/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+-->
 
-    <!-- Feather Icons -->
-    <script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
-    <script>
+<!-- Feather Icons -->
+<script src="https://unpkg.com/feather-icons/dist/feather.min.js"></script>
+<script>
       feather.replace()
-    </script>
+
+</script>
 
 
 </body>

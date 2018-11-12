@@ -25,24 +25,24 @@ from rq import Connection, Queue, Worker
 nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
 
 
-def start_rq_worker():
-    listen = ['default']
-    redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
+# def start_rq_worker():
+#     listen = ['default']
+#     redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
+#
+#     conn = redis.from_url(redis_url)
+#
+#     # with Connection(conn):
+#         # worker = Worker(list(map(Queue, listen)))
+#         # worker.work()
+#     while True:
+#         print('test test test')
+#         time.sleep(3)
 
-    conn = redis.from_url(redis_url)
-
-    # with Connection(conn):
-        # worker = Worker(list(map(Queue, listen)))
-        # worker.work()
-    while True:
-        print('test test test')
-        time.sleep(3)
 
 
-
-# TODO delete this test method
-def hello_world():
-    print('HELLO WORLD')
+# # TODO delete this test method
+# def hello_world():
+#     print('HELLO WORLD')
 
 
 def ping(task) -> bool:
