@@ -1,166 +1,141 @@
-import json
+# import stdlib
 import logging
-import re
-import sys
-import time
-import urllib3
-import yaml
+from threading import Thread
 
-# import openVulnQuery
-# from openVulnQuery.query_client import OpenVulnQueryClient
-# from openVulnQuery.advisory import AdvisoryIOS
-from openVulnQuery._library.query_client import OpenVulnQueryClient
-from openVulnQuery._library.advisory import AdvisoryIOS
-from typing import List
-
+# import third party lib
 from flask import Flask
 from flask import render_template
 from flask import request
-from nornir.core import InitNornir
-from nornir.plugins.tasks import networking
-from nornir.plugins.tasks.networking import napalm_get
-from nornir.plugins.functions.text import print_result
+from openVulnQuery._library.advisory import AdvisoryIOS
 from redis import Redis
 from rq import Queue
-from main import nr
+from typing import List
+import urllib3
+
+# import custom
+import orch
+
+# @TODO comments/documentation
+# @TODO type hinting
+# @TODO logging
+# @TODO unit tests
+# @TODO queueing
+# @TODO interface with netbox
+# @TODO methoden in eigenes file auslagern
 
 
-def ping(task) -> bool:
-    # @TODO: implement ping method
-    return True
+# Flask application
+app = Flask(__name__)
+
+# RQ queue
+q = Queue(connection=Redis())
 
 
-def reload_switch(hostname):
-    logging.info('reloading switch {h}'.format(h=hostname))
-
-    # reload switch
-    # @TODO: reload switch
-
-    # wait at least 20sec in order to give switch enough time to shut down
-    # time.sleep(20)
-
-    ping_ok = False
-    time.sleep(10)
-    ping_ok = True
-    # # apply filter to inventory to only select the one affected host
-    # switch = nr.filter(hostname=hostname)
-    #
-    # while not ping_ok:
-    #     # run task 'ping'
-    #     ping_ok = switch.run(task=ping)
-    #
-    #     # wait for 5 seconds
-    #     time.sleep(5)
-
-    return {'status': 'switch reloaded successfully', 'ping': 'reachable'}
+# ##################################################################################################
+# ##################################################################################################
+#                                                                                                  #
+# FLASK ROUTES                                                                                     #
+#                                                                                                  #
+# ##################################################################################################
+# ##################################################################################################
+@app.route("/")
+def start():
+    job = q.enqueue(f='orch.hello_world',
+                         job_id='mytestjob001')
+    return render_template('index.html')
 
 
-def find_vulnerabilities(os: str = '', version: str = '') -> List[AdvisoryIOS]:
-    """
-    finds all vulnerabilities of a given Cisco switch model by querying the Cisco openvuln API
-    (only works for devices running IOS since function 'get_by_ios' is being used
-    :param version: Cisco switch model running IOS
-    :return: returns a list of all found vulnerabilities
-    """
-    if os == '':
-        os = request.args.get('os')
-    if version == '':
-        version = request.args.get('version')
-
-    try:
-        with(open('openvuln/openvuln_api_credentials.json', 'r')) as data:
-            credentials = json.load(data)
-    except FileNotFoundError as e:
-        print('file with openvuln api credentials could not be found!\n{e}'.format(e=e), file=sys.stderr)
-        sys.exit(1)
-
-    query_client: OpenVulnQueryClient = OpenVulnQueryClient(
-        client_id=credentials['CLIENT_ID'],
-        client_secret=credentials['CLIENT_SECRET'])
-
-    if os == 'ios':
-        advisories: List[AdvisoryIOS] = query_client.get_by_ios('', version)
-    elif os == 'ios-xe':
-        advisories: List[AdvisoryIOS] = query_client.get_by_ios_xe('', version)
-    return advisories
+@app.route("/sites")
+def sites_index():
+    sites = orch.get_sites()
+    return render_template('sites/index.html', sites=sites)
 
 
-def get_sites() -> list:
-    """
-    reads the devices.yaml in the inventory directory and creates a distinct list of sites
-    :return: returns a list of all sites
-    """
-    try:
-        stream = open('inventory/devices.yaml')
-    except FileNotFoundError as e:
-        print('inventory file could not be found!\n{e}'.format(e=e), file=sys.stderr)
-        sys.exit(1)
-
-    devices = yaml.load(stream)
-
-    sites = []
-    for host, host_details in devices.items():
-        if host_details['site'] not in sites:
-            sites.append(host_details['site'])
-
-    return sites
+@app.route("/inventory")
+def inventory_index():
+    devices = orch.get_devices()
+    return render_template('inventory/index.html', devices=devices)
 
 
-def get_devices() -> dict:
-    """
-    reads the devices.yaml in the inventory directory
-    :return: returns a dictionary of all devices in the inventory
-    """
-    try:
-        stream = open('inventory/devices.yaml')
-    except FileNotFoundError as e:
-        print('inventory file could not be found!\n{e}'.format(e=e), file=sys.stderr)
-        sys.exit(1)
-
-    devices = yaml.load(stream)
-    return devices
+@app.route("/firmware")
+def firmware_index():
+    return render_template('firmware/index.html')
 
 
-# this method is a nornir task
-def get_firmware_version(task):
-    """
-    runs napalm get_facts, extracts firmware version and saves it in the inventory
-    as a host variable 'firmware'
-    note: depending on the OS, napalm returns the 'os version' in different formats,
-    somtimes just the version jumber (9.2(1)) and sometimes
-    :param task:
-    :return:
-    """
-    # use napalm to get device facts
-    r = task.run(task=networking.napalm_get, getters=['facts'])
+@app.route("/firmware/show")
+def firmware_show():
+    devices = orch.get_firmware()
+    return render_template('firmware/show.html', devices=devices)
 
-    # extract OS version from result using regex
-    os_version = r.result['facts']['os_version']
-    # p = re.compile(r'(Version )(\d{2,}\.\d\.\d)', re.IGNORECASE)
-    p = re.compile(r'(\d+.\d+(\(|\.)\d+[a-z]?(\)?))', re.IGNORECASE)
-    matches = p.findall(os_version)
-    # if version number could not be found using regex pattern: set firmware to 'unknown'
-    if len(matches) == 0:
-        firmware = 'unknown'
-    # else: set firmware to version number
+
+@app.route("/vulnerabilities")
+def vulnerabilities_index():
+    return render_template('vulnerabilities/index.html')
+
+
+@app.route("/vulnerabilities/show")
+def vulnerabilities_show() -> List[AdvisoryIOS]:
+    os = request.args.get('os')
+    version = request.args.get('version')
+
+    vulnerabilities = orch.find_vulnerabilities(os, version)
+    return render_template('vulnerabilities/show.html', vulnerabilities=vulnerabilities, os=os, version=version)
+
+
+@app.route("/resetter")
+def resetter_index():
+    devices = orch.get_devices()
+    return render_template('resetter/index.html', devices=devices)
+
+
+@app.route("/resetter/reload")
+def reload():
+    hostname = request.args.get('hostname')
+
+    # creating a job ID
+    job_id = 'reload_{h}'.format(h=hostname)
+
+    # simple version
+    # job = q.enqueue(reload_switch, hostname)
+
+    # explicit version
+    job = q.enqueue_call(func=orch.reload_switch(),
+                         args=(hostname,),
+                         job_id=job_id)
+
+    return render_template('resetter/reload.html', hostname=hostname, job_id=job_id)
+
+
+@app.route("/resetter/reload_status")
+def reload_status():
+    hostname = request.args.get('hostname')
+
+    # debugging outputs
+    job = q.fetch_job('reload_{h}'.format(h=hostname))
+    if job is None:
+        print('Job is None.')
     else:
-        firmware = matches[0][0]
+        print('Job Status: {s}'.format(s=job.get_status()))
+        print('Job Result: {r}'.format(r=job.result))
+        print('Job ID: {i}'.format(i=job.id))
 
-    # save the firmware version into a host variable
-    task.host['firmware'] = firmware
+    job_id = request.args.get('job_id')
+
+    return render_template('resetter/reload_status.html', hostname=hostname, job=job, job_status=job.get_status())
 
 
-def get_firmware():
-    # apply filter to inventory
-    cisco = nr.filter(site='cisco')
+if __name__ == '__main__':
+    logging.basicConfig(filename='../log/app.log', level=logging.INFO)
 
-    # run task 'get_firmware_version'
-    result = cisco.run(task=get_firmware_version)
+    logging.debug('disabling InsecureRequestWarnings...')
+    # suppress InsecureRequestWarnings
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # show firmware versions
-    devices = {}
-    for h in cisco.inventory.hosts.keys():
-        devices[cisco.inventory.hosts[h]['name']] = cisco.inventory.hosts[h]['firmware']
-        # print('{h}: {f}'.format(h=cisco.inventory.hosts[h]['name'], f=cisco.inventory.hosts[h]['firmware']))
+    # start rq worker in its own thread
+    thread_rq = Thread(target= orch.start_rq_worker)
+    thread_rq.start()
 
-    return devices
+    # run flask web app
+    logging.info('starting web application..')
+    app.run(debug=True)
+    # run_nornir()
