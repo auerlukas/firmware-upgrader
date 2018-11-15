@@ -13,17 +13,20 @@
     </div>
     <div class="row">
         <div class="col">
+            Extracts the sites from the static devices.yaml file (not from the nornir object in memory)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
             <table class="table table-sm table-striped table-bordered">
                 <thead class="thead-dark">
                 <th scope="col">Site</th>
-                <th scope="col">Upgrade</th>
                 </thead>
 
                 <tbody>
                 {% for s in sites %}
                 <tr>
                     <th scope="row">{{ s }}</th>
-                    <td><a href="">upgrade firmware in this site</a></td>
                 </tr>
                 {% endfor %}
                 </tbody>

@@ -30,6 +30,12 @@
     {% endfor %}
 
     {% endif %}
+    <!-- show whether netbox containers are running -->
+    {% if netbox_status %}
+        <p class="p-1 mb-0 bg-info text-white">netbox is running</p>
+    {% else %}
+        <p class="p-1 mb-0 bg-info text-white">netbox not yet running</p>
+    {% endif %}
     {% endwith %}
 
     </p>
@@ -44,7 +50,6 @@
 ('/inventory', 'inventory', 'database', 'Inventory'),
 ('/firmware', 'firmware', 'file', 'Firmware'),
 ('/vulnerabilities', 'vulnerabilities', 'alert-triangle', 'Vulnerabilities'),
-('/vulnerabilities/show?os=ios&version=12.2(55)SE11', 'show', 'alert-triangle', 'Vulnerabilities specific'),
 ('/resetter', 'resetter', 'refresh-cw', 'Switch Resetter'),
 ('/netbox', 'netbox', 'activity', 'Netbox'),
 ('/jobmanager', 'jobmanager', 'compass', 'Job Manager')

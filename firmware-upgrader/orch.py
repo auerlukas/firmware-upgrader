@@ -1,27 +1,22 @@
+# import stdlib
 import json
 import logging
 import re
-import os
 import sys
-import threading
 import time
-import urllib3
 import yaml
-
-# import openVulnQuery
-# from openVulnQuery.query_client import OpenVulnQueryClient
-# from openVulnQuery.advisory import AdvisoryIOS
-from flask import request
-from openVulnQuery._library.query_client import OpenVulnQueryClient
-from openVulnQuery._library.advisory import AdvisoryIOS
 from typing import List
 
+# import third party lib
+from flask import request
 from nornir.core import InitNornir
-from nornir.plugins.tasks import networking
-from nornir.plugins.tasks.networking import napalm_get
 from nornir.plugins.functions.text import print_result
-import redis
-from rq import Connection, Queue, Worker
+from nornir.plugins.tasks import networking
+from openVulnQuery._library.advisory import AdvisoryIOS
+from openVulnQuery._library.query_client import OpenVulnQueryClient
+
+# Nornir
+nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
 
 
 def ping(task) -> bool:
@@ -30,7 +25,7 @@ def ping(task) -> bool:
 
 
 def reload_switch(hostname):
-    logging.info('reloading switch {h}'.format(h=hostname))
+    logging.warning('reloading switch {h}'.format(h=hostname))
 
     # reload switch
     # @TODO: reload switch
@@ -105,7 +100,7 @@ def get_sites() -> list:
     return sites
 
 
-def get_devices(nr) -> dict:
+def get_devices() -> dict:
     # """
     # reads the devices.yaml in the inventory directory
     # :return: returns a dictionary of all devices in the inventory
@@ -131,19 +126,24 @@ def get_firmware_version(task):
     :param task:
     :return:
     """
-    # use napalm to get device facts
-    print(task)
+    # print info regarding task execution for debugging purposes
+    print(f'executing task: {task}')
+
+    # use nornir's napalm feature to get device facts
     try:
         r = task.run(task=networking.napalm_get, getters=['facts'])
     except Exception as e:
         print(e)
-    print_result(r)
+
+    # result can be printed for debugging purposes
+    # print_result(r)
 
     # extract OS version from result using regex
     os_version = r.result['facts']['os_version']
     # p = re.compile(r'(Version )(\d{2,}\.\d\.\d)', re.IGNORECASE)
     p = re.compile(r'(\d+.\d+(\(|\.)\d+[a-z]?(\)?))', re.IGNORECASE)
     matches = p.findall(os_version)
+
     # if version number could not be found using regex pattern: set firmware to 'unknown'
     if len(matches) == 0:
         firmware = 'unknown'
@@ -151,25 +151,13 @@ def get_firmware_version(task):
     else:
         firmware = matches[0][0]
 
-    print('get_firmware_version(): breakpoint')
-    # save the firmware version into a host variable
+    # save the firmware version to the nornir inventory (object in memory)
     task.host['firmware'] = firmware
-    print('and here comes the print:')
-    print(task.host['name']['firmware'])
 
 
-def get_firmware(nr):
-    # print for debugging
-    print('execute methode "get_firmware()"')
-
+def get_firmware():
     # apply filter to inventory
     cisco = nr.filter(site='cisco')
 
     # run task 'get_firmware_version'
-    result = cisco.run(task=get_firmware_version)
-
-    # show firmware versions
-    # devices = {}
-    # for h in cisco.inventory.hosts.keys():
-    # devices[cisco.inventory.hosts[h]['name']] = cisco.inventory.hosts[h]['firmware']
-    # print('{h}: {f}'.format(h=cisco.inventory.hosts[h]['name'], f=cisco.inventory.hosts[h]['firmware']))
+    cisco.run(task=get_firmware_version)

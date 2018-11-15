@@ -14,12 +14,19 @@
     <div class="row">
         <div class="col">
             <p>
-            <b>nornir:</b> click <a href="firmware/show">here</a> to get firmware version for all devices in site 'cisco' (see devices.yaml)
+                Uses nornir's parralel computing feature to get firmware of all devices belonging to site 'cisco' (see
+                devices.yaml)
+            </p>
+            <p><strong><a href="/firmware/show">fetch firmware versions</a></strong>
             </p>
             <p>
-            This will add the variable 'firmware' to the nornir object/inventory which can then be accessed via nr.inventory.hosts[<hostname>].firmware</p>
-            <p>Note: This will start a long running job, put this job into the job manager queue (running in its own thread).</p>
-            <p>Once the job complets, the user can click on "Inventory" in the menu and will see an updated inventory including firmware versions.</p>
+                This will add the variable 'firmware' to the nornir object/inventory which can then be accessed via
+                nr.inventory.hosts[hostname].firmware<br>
+                Note: This will start a long running job, put this job into the job manager queue (running in its own
+                thread).<br>
+                Once the job complets, the user can click on "Inventory" in the menu and will see an updated inventory
+                including firmware versions.
+            </p>
         </div>
     </div>
 

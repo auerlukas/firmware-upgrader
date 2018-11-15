@@ -13,6 +13,11 @@
     </div>
     <div class="row">
         <div class="col">
+            Shows the inventory as stored in the nornir object.
+        </div>
+    </div>
+    <div class="row">
+        <div class="col">
             <table class="table table-sm table-striped table-bordered">
                 <thead class="thead-dark">
                 <th scope="col">Host Name</th>
@@ -33,13 +38,13 @@
                     <td>{{ devices[d].firmware }}</td>
                     <td>
                         {% if devices[d].firmware %}
-                            {% if devices[d].nos == 'ios' or devices[d].nos == 'ios-xe' %}
-                            <a href="vulnerabilities/show?os={{ devices[d].operating_system }}&version={{ devices[d].firmware }}">check</a>
-                            {% else %}
-                            os not supported
-                            {% endif %}
+                        {% if devices[d].nos == 'ios' or devices[d].nos == 'ios-xe' %}
+                        <a href="vulnerabilities/show?os={{ devices[d].operating_system }}&version={{ devices[d].firmware }}">check</a>
                         {% else %}
-                            <a href="firmware/show">fetch firmware first</a>
+                        os not supported
+                        {% endif %}
+                        {% else %}
+                        <a href="firmware/show">fetch firmware first</a>
                         {% endif %}
 
                     </td>

@@ -1,33 +1,30 @@
 # import stdlib
 import logging
+import os
+import subprocess
+import threading
+import urllib3
+from functools import partial
+from queue import Queue
 from threading import Thread
+from typing import List
 
 # import third party lib
 from flask import Flask
 from flask import render_template, flash, redirect
 from flask import request
-from functools import partial
 from openVulnQuery._library.advisory import AdvisoryIOS
-from queue import Queue
-from typing import List
-import threading
-import urllib3
-from nornir.core import InitNornir
-
 
 # import custom
-from config import Config
 import forms
 import ntbx
 import orch
+from config import Config
 
 # @TODO comments/documentation
 # @TODO type hinting
 # @TODO logging
 # @TODO unit tests
-# @TODO queueing
-# @TODO interface with netbox
-# @TODO methoden in eigenes file auslagern
 
 
 # Flask application
@@ -35,17 +32,24 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Job Queue
-# needed to make sure that actions from multiple users do not conflict with eachother - work sequentially
+# needed to make sure that actions from multiple users do not conflict with eachother - working off tasks sequentially
 jobs = Queue()
 
-# Nornir
-nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
+# Netbox
+ntbx_api_url_base = 'not_ready'
+ntbx_status = False
+
+
+# make variable 'netbox' available in jinja templates
+@app.context_processor
+def inject_netbox_status():
+    return dict(netbox_status=ntbx_status)
 
 
 # ##################################################################################################
 # ##################################################################################################
 #                                                                                                  #
-# FLASK ROUTES                                                                                     #
+# FLASK ROUTES START                                                                               #
 #                                                                                                  #
 # ##################################################################################################
 # ##################################################################################################
@@ -62,7 +66,7 @@ def sites_index():
 
 @app.route("/inventory")
 def inventory_index():
-    devices = orch.get_devices(nr)
+    devices = orch.get_devices()
     return render_template('inventory/index.html', devices=devices)
 
 
@@ -75,14 +79,12 @@ def firmware_index():
 def firmware_show():
     # getting firmware takes quite a bit of time
     # therefore create a job and put it into the job queue
-    job = {'function': 'orch.get_firmware'}
+    # job = {'function': 'orch.get_firmware'}
+    job = partial(orch.get_firmware)
     jobs.put(job)
 
     # jump to inventory index page
     return render_template('firmware/index.html')
-
-    # devices = orch.get_firmware()
-    # return render_template('firmware/show.html', devices=devices)
 
 
 @app.route("/vulnerabilities")
@@ -101,7 +103,7 @@ def vulnerabilities_show() -> List[AdvisoryIOS]:
 
 @app.route("/resetter")
 def resetter_index():
-    devices = orch.get_devices(nr)
+    devices = orch.get_devices()
     return render_template('resetter/index.html', devices=devices)
 
 
@@ -109,52 +111,30 @@ def resetter_index():
 def reload():
     hostname = request.args.get('hostname')
 
-    # # creating a job ID
-    # job_id = 'reload_{h}'.format(h=hostname)
-    #
-    # # simple version
-    # # job = q.enqueue(reload_switch, hostname)
-    #
-    # # explicit version
-    # job = q.enqueue_call(func=orch.reload_switch(),
-    #                      args=(hostname,),
-    #                      job_id=job_id)
-
+    # TODO adopt to new queueing mechanism
     # create a new job 'reload_switch' and put it to the job queue
-    job = partial(orch.reload_switch, hostname=hostname)
-    jobs.put(job)
+    j = partial(orch.reload_switch(hostname))
+    jobs.put(j)
     return render_template('resetter/reload.html', hostname=hostname)
 
 
 @app.route("/resetter/reload_status")
 def reload_status():
     hostname = request.args.get('hostname')
-    j = jobs.get()
-    print('size of job queue:')
-
-    # debugging outputs
-    # job = q.fetch_job('reload_{h}'.format(h=hostname))
-    # if job is None:
-    #     print('Job is None.')
-    # else:
-    #     print('Job Status: {s}'.format(s=job.get_status()))
-    #     print('Job Result: {r}'.format(r=job.result))
-    #     print('Job ID: {i}'.format(i=job.id))
-    #
-    # job_id = request.args.get('job_id')
-
     return render_template('resetter/reload_status.html', hostname=hostname)
 
 
 @app.route("/netbox", methods=['GET', 'POST'])
 def netbox_index():
-    sites = ntbx.get_sites()['results']
+    global ntbx_api_url_base
+    sites = ntbx.get_sites(ntbx_api_url_base)['results']
+    ip_addresses = ntbx.get_ip_addresses(ntbx_api_url_base)['results']
     form = forms.IPAddressForm()
     if form.validate_on_submit():
-        result = ntbx.add_ip_address(form.ip_address.data, form.prefix_length.data)
+        result = ntbx.add_ip_address(ntbx_api_url_base, form.ip_address.data, form.prefix_length.data)
         flash(result)
         return redirect('/netbox')
-    return render_template('netbox/index.html', sites=sites, ip_addr_form=form)
+    return render_template('netbox/index.html', sites=sites, ip_addr_form=form, ip_addresses=ip_addresses)
 
 
 @app.route("/jobmanager")
@@ -166,6 +146,14 @@ def jobmanager_index():
     return render_template('jobmanager/index.html', threads=threads, jobs=jobs_list, no_of_jobs=no_of_jobs)
 
 
+# ##################################################################################################
+# ##################################################################################################
+#                                                                                                  #
+# FLASK ROUTES END                                                                               #
+#                                                                                                  #
+# ##################################################################################################
+# ##################################################################################################
+
 
 def job_manager():
     """
@@ -173,39 +161,72 @@ def job_manager():
     handles various (long running) jobs
     :return:
     """
-    logging.info('Job manager started.')
+    logging.warning('Job manager started.')
     while True:
         print('job manager: waiting for queue...')
-        logging.info('waiting for queue...')
+        logging.warning('waiting for queue...')
 
         # get job from queue (block=True is important here)
         # returns a pointer to job (element in queue), that's why it can be called later on using 'job()'
         job = jobs.get(block=True)
 
-        print(job)
-        if job['function'] == 'orch.get_firmware':
-            # execute job
-            print('executing %s' % job)
-            logging.info('executing %s' % job)
-            orch.get_firmware(nr)
-            print('finished %s' % job)
-            logging.info('finished %s' % job)
+        print(f'job_manager: running job \'{job}\'')
+        logging.warning('executing %s' % job)
+        print('executing %s' % job)
+        job()
+        logging.warning('finished %s' % job)
+        print('finished %s' % job)
 
         jobs.task_done()
 
 
-if __name__ == '__main__':
-    logging.basicConfig(filename='../log/app.log', level=logging.INFO)
+def start_netbox():
+    # start netbox containers
+    logging.warning('starting netbox containers...')
+    result = subprocess.Popen('cd /home/luk/dev/netbox-docker; docker-compose up -d',
+                              shell=True, stdout=subprocess.PIPE).stdout.read()
 
-    logging.info('disabling InsecureRequestWarnings...')
+    # find out IP address and TCP port on which netbox is running
+    ntbx_socket = subprocess.Popen('cd /home/luk/dev/netbox-docker; docker-compose port nginx 8080',
+                                   shell=True, stdout=subprocess.PIPE).stdout.read()
+
+    ntbx_socket = ntbx_socket.decode('ascii').strip()
+
+    # construct netbox api base url
+    global ntbx_api_url_base
+    ntbx_api_url_base = f'http://{ntbx_socket}/api/'
+    global ntbx_status
+    ntbx_status = True
+    return result
+
+
+if __name__ == '__main__':
+    logging.basicConfig(filename='../log/app.log', level=logging.WARNING)
+
     # suppress InsecureRequestWarnings
+    logging.warning('disabling InsecureRequestWarnings...')
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     # create a new thread which runs in the background and handles a job queue
     job_manager = Thread(target=job_manager, name='JobManager')
     job_manager.start()
 
+    # netbox
+    # find out IP address and TCP port on which netbox is running (actually the nginx container belonging to netbox)
+    ntbx_socket = subprocess.Popen('cd /home/luk/dev/netbox-docker; docker-compose port nginx 8080',
+                                   shell=True, stdout=subprocess.PIPE).stdout.read()
+    ntbx_socket = ntbx_socket.decode('ascii').strip()
+
+    # construct netbox api base url
+    ntbx_api_url_base = f'http://{ntbx_socket}/api/'
+
+    # start netbox containers if not yet running
+    if not ntbx_socket:
+        job = partial(start_netbox)
+        jobs.put(job)
+    else:
+        ntbx_status = True
+
     # run flask web app
-    logging.info('starting web application..')
+    logging.warning('starting flask web application..')
     app.run(host='127.0.0.1', port=5000, debug=True)
-    # run_nornir()
