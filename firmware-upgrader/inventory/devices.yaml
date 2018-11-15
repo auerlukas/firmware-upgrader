@@ -26,7 +26,7 @@
 ##  groups:
 ##    - ins_network
 
-sbx-nxos-mgmt.cisco.com:     {hostname: sbx-nxos-mgmt.cisco.com,   ip: 64.103.37.14, os: nxos,   version: 12.2(55)SE11,  site: cisco,    test: True,  groups: [cisco_sandbox]}
+sbx-nxos-mgmt.cisco.com:     {hostname: sbx-nxos-mgmt.cisco.com,   ip: 64.103.37.14, os: nxos,   version: n/a,  site: cisco,    test: True,  groups: [cisco_sandbox]}
 sw01-pod-1.lab.ins.hsr.ch:   {hostname: sw01-pod-1.lab.ins.hsr.ch, ip: 152.96.11.41, os: ios,    version: 15.7(3)M2,     site: branch01, test: False, groups: [ins_network]}
 sw01-pod-2.lab.ins.hsr.ch:   {hostname: sw02-pod-1.lab.ins.hsr.ch, ip: 152.96.11.42, os: ios,    version: 12.1(6)EX,     site: branch01, test: False, groups: [ins_network]}
 sw01-pod-3.lab.ins.hsr.ch:   {hostname: sw03-pod-1.lab.ins.hsr.ch, ip: 152.96.11.43, os: ios,    version: 12.2(33)SXI12, site: branch02, test: False, groups: [ins_network]}

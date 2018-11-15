@@ -31,9 +31,6 @@ import orch
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# RQ queue
-# q = Queue(connection=Redis())
-
 # Job Queue
 jobs = Queue()
 
@@ -175,13 +172,9 @@ if __name__ == '__main__':
     # suppress InsecureRequestWarnings
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    # start rq worker in its own thread
-    # thread_rq = Thread(target= orch.start_rq_worker)
-    # thread_rq.start()
-
     # create a new thread which runs in the background and handles a job queue
-    # job_manager = Thread(target=job_manager, name='JobManager')
-    # job_manager.start()
+    job_manager = Thread(target=job_manager, name='JobManager')
+    job_manager.start()
 
     # run flask web app
     logging.info('starting web application..')

@@ -1,10 +1,11 @@
 import json
 import requests
 
-api_token = '0123456789abcdef0123456789abcdef01234567'
+api_token = 'b7678b45dd60038c9e1383faf72898244dbde37e'
 api_url_base = 'http://0.0.0.0:32769/api/'
 
-headers = {'Content-Type': 'application/json',
+headers = {'Accept': 'application/json',
+           'Content-Type': 'application/json',
            'Authorization': 'Token {t}'.format(t=api_token)}
 
 
@@ -19,12 +20,11 @@ def get_sites():
 
 
 def add_ip_address(ip_address, prefix_length):
-    print('ntbx.add_ip_address()')
-    api_url = f'{api_url_base}ipam/ip-addresses'
+    api_url = f'{api_url_base}ipam/ip-addresses/'
     payload = {'address': ip_address + '/' + prefix_length}
-    response = requests.post(api_url, headers=headers, data=payload)
+    response = requests.request('POST', api_url, headers=headers, json=payload)
 
-    if response.status_code == 200:
+    if response.status_code == 201:
         return 'IP address {ip}/{prefix} added successfully.'.format(ip=ip_address, prefix=prefix_length)
     else:
         return 'an error occurred!'
