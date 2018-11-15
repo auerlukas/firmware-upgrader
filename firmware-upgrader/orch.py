@@ -11,6 +11,7 @@ import yaml
 # import openVulnQuery
 # from openVulnQuery.query_client import OpenVulnQueryClient
 # from openVulnQuery.advisory import AdvisoryIOS
+from flask import request
 from openVulnQuery._library.query_client import OpenVulnQueryClient
 from openVulnQuery._library.advisory import AdvisoryIOS
 from typing import List
@@ -21,28 +22,6 @@ from nornir.plugins.tasks.networking import napalm_get
 from nornir.plugins.functions.text import print_result
 import redis
 from rq import Connection, Queue, Worker
-
-nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
-
-
-# def start_rq_worker():
-#     listen = ['default']
-#     redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
-#
-#     conn = redis.from_url(redis_url)
-#
-#     # with Connection(conn):
-#         # worker = Worker(list(map(Queue, listen)))
-#         # worker.work()
-#     while True:
-#         print('test test test')
-#         time.sleep(3)
-
-
-
-# # TODO delete this test method
-# def hello_world():
-#     print('HELLO WORLD')
 
 
 def ping(task) -> bool:
@@ -126,19 +105,20 @@ def get_sites() -> list:
     return sites
 
 
-def get_devices() -> dict:
-    """
-    reads the devices.yaml in the inventory directory
-    :return: returns a dictionary of all devices in the inventory
-    """
-    try:
-        stream = open('inventory/devices.yaml')
-    except FileNotFoundError as e:
-        print('inventory file could not be found!\n{e}'.format(e=e), file=sys.stderr)
-        sys.exit(1)
-
-    devices = yaml.load(stream)
-    return devices
+def get_devices(nr) -> dict:
+    # """
+    # reads the devices.yaml in the inventory directory
+    # :return: returns a dictionary of all devices in the inventory
+    # """
+    # try:
+    #     stream = open('inventory/devices.yaml')
+    # except FileNotFoundError as e:
+    #     print('inventory file could not be found!\n{e}'.format(e=e), file=sys.stderr)
+    #     sys.exit(1)
+    #
+    # devices = yaml.load(stream)
+    # return devices
+    return nr.inventory.hosts
 
 
 # this method is a nornir task
@@ -147,12 +127,17 @@ def get_firmware_version(task):
     runs napalm get_facts, extracts firmware version and saves it in the inventory
     as a host variable 'firmware'
     note: depending on the OS, napalm returns the 'os version' in different formats,
-    somtimes just the version jumber (9.2(1)) and sometimes
+    somtimes just the version jumber (9.2(1)) and sometimes with a string before the number
     :param task:
     :return:
     """
     # use napalm to get device facts
-    r = task.run(task=networking.napalm_get, getters=['facts'])
+    print(task)
+    try:
+        r = task.run(task=networking.napalm_get, getters=['facts'])
+    except Exception as e:
+        print(e)
+    print_result(r)
 
     # extract OS version from result using regex
     os_version = r.result['facts']['os_version']
@@ -166,11 +151,17 @@ def get_firmware_version(task):
     else:
         firmware = matches[0][0]
 
+    print('get_firmware_version(): breakpoint')
     # save the firmware version into a host variable
     task.host['firmware'] = firmware
+    print('and here comes the print:')
+    print(task.host['name']['firmware'])
 
 
-def get_firmware():
+def get_firmware(nr):
+    # print for debugging
+    print('execute methode "get_firmware()"')
+
     # apply filter to inventory
     cisco = nr.filter(site='cisco')
 
@@ -178,9 +169,7 @@ def get_firmware():
     result = cisco.run(task=get_firmware_version)
 
     # show firmware versions
-    devices = {}
-    for h in cisco.inventory.hosts.keys():
-        devices[cisco.inventory.hosts[h]['name']] = cisco.inventory.hosts[h]['firmware']
-        # print('{h}: {f}'.format(h=cisco.inventory.hosts[h]['name'], f=cisco.inventory.hosts[h]['firmware']))
-
-    return devices
+    # devices = {}
+    # for h in cisco.inventory.hosts.keys():
+    # devices[cisco.inventory.hosts[h]['name']] = cisco.inventory.hosts[h]['firmware']
+    # print('{h}: {f}'.format(h=cisco.inventory.hosts[h]['name'], f=cisco.inventory.hosts[h]['firmware']))

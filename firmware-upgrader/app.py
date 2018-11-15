@@ -10,7 +10,10 @@ from functools import partial
 from openVulnQuery._library.advisory import AdvisoryIOS
 from queue import Queue
 from typing import List
+import threading
 import urllib3
+from nornir.core import InitNornir
+
 
 # import custom
 from config import Config
@@ -32,7 +35,11 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Job Queue
+# needed to make sure that actions from multiple users do not conflict with eachother - work sequentially
 jobs = Queue()
+
+# Nornir
+nr = InitNornir(config_file='nornir/config.yaml', dry_run=True)
 
 
 # ##################################################################################################
@@ -55,7 +62,7 @@ def sites_index():
 
 @app.route("/inventory")
 def inventory_index():
-    devices = orch.get_devices()
+    devices = orch.get_devices(nr)
     return render_template('inventory/index.html', devices=devices)
 
 
@@ -66,8 +73,16 @@ def firmware_index():
 
 @app.route("/firmware/show")
 def firmware_show():
-    devices = orch.get_firmware()
-    return render_template('firmware/show.html', devices=devices)
+    # getting firmware takes quite a bit of time
+    # therefore create a job and put it into the job queue
+    job = {'function': 'orch.get_firmware'}
+    jobs.put(job)
+
+    # jump to inventory index page
+    return render_template('firmware/index.html')
+
+    # devices = orch.get_firmware()
+    # return render_template('firmware/show.html', devices=devices)
 
 
 @app.route("/vulnerabilities")
@@ -86,7 +101,7 @@ def vulnerabilities_show() -> List[AdvisoryIOS]:
 
 @app.route("/resetter")
 def resetter_index():
-    devices = orch.get_devices()
+    devices = orch.get_devices(nr)
     return render_template('resetter/index.html', devices=devices)
 
 
@@ -142,6 +157,14 @@ def netbox_index():
     return render_template('netbox/index.html', sites=sites, ip_addr_form=form)
 
 
+@app.route("/jobmanager")
+def jobmanager_index():
+    # get all running threads
+    threads = threading.enumerate()
+    jobs_list = list(jobs.queue)
+    no_of_jobs = len(jobs_list)
+    return render_template('jobmanager/index.html', threads=threads, jobs=jobs_list, no_of_jobs=no_of_jobs)
+
 
 
 def job_manager():
@@ -152,15 +175,21 @@ def job_manager():
     """
     logging.info('Job manager started.')
     while True:
+        print('job manager: waiting for queue...')
         logging.info('waiting for queue...')
 
         # get job from queue (block=True is important here)
+        # returns a pointer to job (element in queue), that's why it can be called later on using 'job()'
         job = jobs.get(block=True)
 
-        # execute job
-        logging.info('executing %s' % job)
-        job()
-        logging.info('finished %s' % job)
+        print(job)
+        if job['function'] == 'orch.get_firmware':
+            # execute job
+            print('executing %s' % job)
+            logging.info('executing %s' % job)
+            orch.get_firmware(nr)
+            print('finished %s' % job)
+            logging.info('finished %s' % job)
 
         jobs.task_done()
 

@@ -29,12 +29,17 @@
                     <th scope="row">{{ devices[d].hostname }}</th>
                     <td>{{ devices[d].ip }}</td>
                     <td>{{ devices[d].site }}</td>
-                    <td>{{ devices[d].os }}</td>
-                    <td>{{ devices[d].version }}</td>
-                    <td>{% if devices[d].os == 'ios' or devices[d].os == 'ios-xe' %}
-                        <a href="vulnerabilities/show?os={{ devices[d].os }}&version={{ devices[d].version }}">check</a>
+                    <td>{{ devices[d].data['operating_system'] }}</td>
+                    <td>{{ devices[d].firmware }}</td>
+                    <td>
+                        {% if devices[d].firmware %}
+                            {% if devices[d].nos == 'ios' or devices[d].nos == 'ios-xe' %}
+                            <a href="vulnerabilities/show?os={{ devices[d].operating_system }}&version={{ devices[d].firmware }}">check</a>
+                            {% else %}
+                            os not supported
+                            {% endif %}
                         {% else %}
-                        os not supported
+                            <a href="firmware/show">fetch firmware first</a>
                         {% endif %}
 
                     </td>

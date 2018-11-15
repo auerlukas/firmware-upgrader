@@ -26,13 +26,13 @@
 ##  groups:
 ##    - ins_network
 
-sbx-nxos-mgmt.cisco.com:     {hostname: sbx-nxos-mgmt.cisco.com,   ip: 64.103.37.14, os: nxos,   version: n/a,  site: cisco,    test: True,  groups: [cisco_sandbox]}
-sw01-pod-1.lab.ins.hsr.ch:   {hostname: sw01-pod-1.lab.ins.hsr.ch, ip: 152.96.11.41, os: ios,    version: 15.7(3)M2,     site: branch01, test: False, groups: [ins_network]}
-sw01-pod-2.lab.ins.hsr.ch:   {hostname: sw02-pod-1.lab.ins.hsr.ch, ip: 152.96.11.42, os: ios,    version: 12.1(6)EX,     site: branch01, test: False, groups: [ins_network]}
-sw01-pod-3.lab.ins.hsr.ch:   {hostname: sw03-pod-1.lab.ins.hsr.ch, ip: 152.96.11.43, os: ios,    version: 12.2(33)SXI12, site: branch02, test: False, groups: [ins_network]}
-sw01-pod-4.lab.ins.hsr.ch:   {hostname: sw04-pod-1.lab.ins.hsr.ch, ip: 152.96.11.44, os: ios,    version: 12.2(55)SE11,  site: branch02, test: False, groups: [ins_network]}
-switch11-1:                  {hostname: switch11-1,                ip: 10.0.0.1,     os: ios,    version: 12.2(55)SE11,  site: branch11, test: False, groups: [dummy]}
-switch11-2:                  {hostname: switch11-2,                ip: 10.0.0.2,     os: ios,    version: 12.2(55)SE11,  site: branch11, test: False, groups: [dummy]}
-switch12-1:                  {hostname: switch12-1,                ip: 10.0.0.3,     os: ios-xe, version: 16.13.1,       site: branch12, test: False, groups: [dummy]}
-switch12-2:                  {hostname: switch12-2,                ip: 10.0.0.4,     os: ios-xe, version: 17.1.1,        site: branch12, test: False, groups: [dummy]}
-switch13-1:                  {hostname: switch13-1,                ip: 10.0.0.5,     os: ios-xe, version: 3.10.9S,       site: branch13, test: False, groups: [dummy]}
+sbx-nxos-mgmt.cisco.com:     {hostname: sbx-nxos-mgmt.cisco.com,   ip: 64.103.37.14, operating_system: nxos,   version: n/a,  site: cisco,    test: True,  groups: [cisco_sandbox]}
+sw01-pod-1.lab.ins.hsr.ch:   {hostname: sw01-pod-1.lab.ins.hsr.ch, ip: 152.96.11.41, operating_system: ios-xe,    version: n/a,     site: cisco, test: False, groups: [ins_network]}
+sw02-pod-1.lab.ins.hsr.ch:   {hostname: sw02-pod-1.lab.ins.hsr.ch, ip: 152.96.11.42, operating_system: ios,    version: n/a,     site: cisco, test: False, groups: [ins_network]}
+sw03-pod-1.lab.ins.hsr.ch:   {hostname: sw03-pod-1.lab.ins.hsr.ch, ip: 152.96.11.43, operating_system: ios,    version: n/a, site: cisco, test: False, groups: [ins_network]}
+sw04-pod-1.lab.ins.hsr.ch:   {hostname: sw04-pod-1.lab.ins.hsr.ch, ip: 152.96.11.44, operating_system: ios,    version: n/a,  site: cisco, test: False, groups: [ins_network]}
+switch11-1:                  {hostname: switch11-1,                ip: 10.0.0.1,     operating_system: ios,    version: 12.2(55)SE11,  site: branch11, test: False, groups: [dummy]}
+switch11-2:                  {hostname: switch11-2,                ip: 10.0.0.2,     operating_system: ios,    version: 12.2(55)SE11,  site: branch11, test: False, groups: [dummy]}
+switch12-1:                  {hostname: switch12-1,                ip: 10.0.0.3,     operating_system: ios-xe, version: 16.13.1,       site: branch12, test: False, groups: [dummy]}
+switch12-2:                  {hostname: switch12-2,                ip: 10.0.0.4,     operating_system: ios-xe, version: 17.1.1,        site: branch12, test: False, groups: [dummy]}
+switch13-1:                  {hostname: switch13-1,                ip: 10.0.0.5,     operating_system: ios-xe, version: 3.10.9S,       site: branch13, test: False, groups: [dummy]}

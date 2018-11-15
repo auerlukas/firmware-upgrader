@@ -1,5 +1,5 @@
 ---
-num_workers: 100
+num_workers: 10
 inventory: nornir.plugins.inventory.simple.SimpleInventory
 SimpleInventory:
   host_file: "inventory/devices.yaml"
