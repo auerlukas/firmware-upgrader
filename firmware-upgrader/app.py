@@ -113,7 +113,7 @@ def reload():
 
     # TODO adopt to new queueing mechanism
     # create a new job 'reload_switch' and put it to the job queue
-    j = partial(orch.reload_switch(hostname))
+    j = partial(orch.reload_switch, hostname)
     jobs.put(j)
     return render_template('resetter/reload.html', hostname=hostname)
 
